@@ -108,7 +108,7 @@ kubernetes 1.20+
 
 - 存在一个默认target，在系统启动时候自动被激活，实际上是启动了与之关联的一堆捆绑服务，通过指定不同的target可以进入不同的环境
 - 绝大部分的unit可以通过配置文件来创建，被创建的unit一般是按照配置文件名来命名的（一般在/usr/lib/systemd/system），但也有一部分比如上面的[scope](https://www.freedesktop.org/software/systemd/man/systemd.scope.html#)类型的unit是无法通过配置文件创建，是systemd运行时创建的
-- systemd利用cgroup创建专属于systemd的控制组层级结构，对应的文件系统目录为/sys/fs/cgroup/systemd（实际是内存里的临时文件），并利用cgroup创建和service、scope和slice等unit对应的控制组层级结构，以便systemd能利用cgroup对unit进行追踪和资源管理，可以使用systemd-cgls来展示整个cgroup层级结构，systemd和cgroup的相关内容还可以参考[文档](https://www.freedesktop.org/wiki/Software/systemd/ControlGroupInterface/)
+- systemd在cgroups的文件系统目录里创建专属于systemd的控制组层级结构，对应的文件系统目录为/sys/fs/cgroup/systemd（实际是内存里的临时文件），并创建和service、scope和slice等unit对应的控制组层级结构，每个服务就是一个控制组以便systemd能对unit进行追踪和资源管理，可以使用systemd-cgls来展示整个systemd cgroup层级结构，systemd和cgroup的相关内容还可以参考[文档](https://www.freedesktop.org/wiki/Software/systemd/ControlGroupInterface/)
 
 - systemd的常用命令：
     ```sh 
@@ -136,7 +136,7 @@ kubernetes 1.20+
 
 
 ## cgroup
-- cgroup是内核提供的一种机制，可以把任务（进程或应用）及其子任务进行整合或隔离到多个任务分组中，并提供一个叫做子系统的模块对任务分组进行特定资源的管理和限制
+- [cgroup](https://www.kernel.org/doc/Documentation/cgroup-v1/cgroups.txt)是内核提供的一种机制，来把任务（进程或线程）及其子任务进行整合或隔离到多个任务分组中，并提供一个叫做子系统的模块对任务分组进行特定资源的管理和限制
 - 每一个任务分组在cgroup里都有一个虚拟文件系统目录实例，用户可以通过这个虚拟文件系统目录进行各种操作，比如创建任务分组、销毁任务分组、给任务指定分组、追踪任务等和对分组进行资源限制等
 
 ## 安装
