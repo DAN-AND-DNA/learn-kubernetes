@@ -70,7 +70,7 @@ kubernetes 1.20+
 - 因为简单
 
 ## cgroup
-- [cgroup](https://www.kernel.org/doc/Documentation/cgroup-v1/cgroups.txt)是内核提供的一种机制，可以把任务（进程或线程）及其子任务进行整合或分隔到多个控制组（cgroup）中，并提供一个叫做子系统（subsystem）的模块对控制组进行特定资源的管理和限制，通过挂载控制组虚拟文件系统（cgroup virtual filesystem）就实现了控制组层级树（cgroup hierarchy tree），上述过程的命令如下：
+- [cgroup](https://www.kernel.org/doc/Documentation/cgroup-v1/cgroups.txt)是内核提供的一种机制，可以把任务（进程或线程）及其子任务进行整合或分隔到多个控制组（cgroup）中，并提供一个叫做子系统（subsystem）的模块对控制组进行特定资源的管理和限制，通过挂载控制组虚拟文件系统（cgroup virtual filesystem）就实现了控制组层级树（cgroup hierarchy tree），通过挂载控制组虚拟文件系统，控制组层级树就会自动出现在/proc/mounts中，如果在其上创建新控制组，在其中指定任务的PID和资源限制，相应的修改就会自动通知给内核，任务的信息也会自动出现在/proc/\<pid>/cgroups里。用户可以通过这个虚拟文件系统进行其他操作，比如创建新控制组、销毁控制组、给任务指定控制组、追踪任务和对任务进行资源限制等，上述过程的命令如下：
     ```sh
     # 拥有全部的子系统
     mount -t cgroup xxx /sys/fs/cgroup 
@@ -83,8 +83,6 @@ kubernetes 1.20+
     mkdir /sys/fs/cgroup/rg1 
     mount -t cgroup -o cpuset,memory hier1 /sys/fs/cgroup/rg1 
     ```
-    
-- 通过挂载控制组虚拟文件系统，控制组层级树就会自动出现在/proc/mounts中，如果在其上创建新控制组，在其中指定任务的PID和资源限制，相应的修改就会自动通知给内核，任务的信息也会自动出现在/proc/\<pid>/cgroups里。用户可以通过修改这个虚拟文件系统进行其他操作，比如创建新控制组、销毁控制组、给任务指定控制组、追踪任务和对任务进行资源限制等
 
 ## systemd
 
