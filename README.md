@@ -70,7 +70,8 @@ kubernetes 1.20+
 - 因为简单
 
 ## cgroup
-- [cgroup](https://www.kernel.org/doc/Documentation/cgroup-v1/cgroups.txt)是内核提供的一种机制，可以把任务（进程或线程）及其子任务进行整合或分隔到多个控制组（cgroup）中，并提供一个叫做子系统（subsystem）的模块对控制组进行特定资源的管理和限制，通过挂载控制组虚拟文件系统（cgroup virtual filesystem）就实现了控制组层级树（cgroup hierarchy tree），通过挂载控制组虚拟文件系统，控制组层级树就会自动出现在/proc/mounts中，如果在其上创建新控制组，在其中指定任务的PID和资源限制，相应的修改就会自动通知给内核，任务的信息也会自动出现在/proc/\<pid>/cgroups里。用户可以通过这个虚拟文件系统进行其他操作，比如创建新控制组、销毁控制组、给任务指定控制组、追踪任务和对任务进行资源限制等，上述过程的命令如下：
+- cgroup是内核提供的一种机制，可以把任务（进程或线程）及其子任务进行整合或分隔到多个控制组（cgroup）中，并提供一个叫做子系统（subsystem）的模块对控制组进行特定资源的管理和限制。控制组从属于某些子系统，就组成了控制组层级树（cgroup hierarchy tree）的结构
+- 实际使用时，需要通过挂载控制组虚拟文件系统（cgroup virtual filesystem）来实现了控制组层级树，控制组层级树就会自动出现在/proc/mounts中，如果在其上创建新控制组，在其中指定任务的PID和资源限制，相应的修改就会自动通知给内核，任务的信息也会自动出现在/proc/\<pid>/cgroups里。用户可以通过这个虚拟文件系统进行其他操作，比如创建新控制组、销毁控制组、给任务指定控制组、追踪任务和对任务进行资源限制等，上述过程的命令如下：
     ```sh
     # 拥有全部的子系统
     mount -t cgroup xxx /sys/fs/cgroup 
@@ -81,8 +82,13 @@ kubernetes 1.20+
     mount -t tmpfs cgroup_root /sys/fs/cgroup
     # 创建资源组
     mkdir /sys/fs/cgroup/rg1 
-    mount -t cgroup -o cpuset,memory hier1 /sys/fs/cgroup/rg1 
+    mount -t cgroup -o cpuset,memory hier1 /sys/fs/cgroup/rg1
+    
+    # 创建控制组
+    cd /sys/fs/cgroup/rg1
+    mkdir Charlie 
     ```
+- 详细内容请参考[文档](https://www.kernel.org/doc/Documentation/cgroup-v1/cgroups.txt)
 
 ## systemd
 
@@ -124,7 +130,7 @@ kubernetes 1.20+
 - 存在一个默认target，在系统启动时候自动被激活，实际上是启动了与之关联的一堆捆绑服务，通过指定不同的target可以进入不同的环境
 - 绝大部分的unit可以通过配置文件来创建，被创建的unit一般是按照配置文件名来命名的（一般在/usr/lib/systemd/system），但也有一部分比如上面的[scope](https://www.freedesktop.org/software/systemd/man/systemd.scope.html#)类型的unit是无法通过配置文件创建，是systemd运行时创建的
 - systemd在cgroups的一个私有目录里，即/sys/fs/cgroup/systemd，systemd利用
-- systemd在cgroups的文件系统目录里创建专属于systemd的控制组层级结构，对应的文件系统目录为/sys/fs/cgroup/systemd（实际是内存里的临时文件），并创建和service、scope和slice等unit对应的控制组层级结构，每个服务就是一个控制组以便systemd能对unit进行追踪和资源管理，可以使用systemd-cgls来展示整个systemd cgroup层级结构，systemd和cgroup的相关内容还可以参考[文档](https://www.freedesktop.org/wiki/Software/systemd/ControlGroupInterface/)
+- systemd在cgroups的文件系统目录里创建专属于systemd的控制组层级结构，对应的虚拟文件系统目录为/sys/fs/cgroup/systemd，并创建和service、scope和slice等unit对应的控制组层级结构，每个服务就是一个控制组以便systemd能利用cgroup对unit进行追踪和资源管理，可以使用systemd-cgls来展示整个systemd cgroup层级结构，systemd和cgroup的相关内容还可以参考[文档](https://www.freedesktop.org/wiki/Software/systemd/ControlGroupInterface/)
 
 - systemd的常用命令：
     ```sh 
