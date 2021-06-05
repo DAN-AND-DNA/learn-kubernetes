@@ -82,11 +82,13 @@ kubernetes 1.20+
 ## cgroup
 - cgroups是内核提供的一种机制，可以把任务（进程）及其子任务进行整合或分隔到多个控制组（cgroup）中，并提供一个叫做子系统（subsystem）的模块对控制组进行特定资源的管理和限制。控制组从属于某些子系统，就组成了控制组层级树（cgroup hierarchy tree）的结构
 - 实际使用时，需要通过挂载控制组虚拟文件系统（cgroup virtual filesystem）来实现了控制组层级树，控制组层级树就会自动出现在/proc/mounts中:
+
     ```sh
     cat /proc/mounts | grep cgroup
     ```
-创建控制组层级树后还需在其上创建新控制组，并指定任务（进程）PID和资源限制，相应的修改就会自动通知给内核，任务的信息也会自动出现在/proc/\<pid>/cgroups里，之后用户就可以追踪和监控相关任务信息。用户还可以进行其他操作，比如创建新控制组、销毁控制组、给任务指定控制组、追踪任务和对任务进行资源限制等，上述过程的命令如下：
-    ```sh
+- 创建控制组层级树后还需在其上创建新控制组，并指定任务（进程）PID和资源限制，相应的修改就会自动通知给内核，任务的信息也会自动出现在/proc/\<pid>/cgroups里，之后用户就可以追踪和监控相关任务信息。用户还可以进行其他操作，比如创建新控制组、销毁控制组、给任务指定控制组、追踪任务和对任务进行资源限制等，上述过程的命令如下：
+
+     ```sh
     # 拥有全部的子系统
     mount -t cgroup xxx /sys/fs/cgroup 
 
@@ -100,7 +102,8 @@ kubernetes 1.20+
     
     # 创建控制组
     cd /sys/fs/cgroup/rg1
-    mkdir Charlie 
+    mkdir Charlie
+
     ```
 - 详细内容请参考[文档](https://www.kernel.org/doc/Documentation/cgroup-v1/cgroups.txt)
 
@@ -138,7 +141,6 @@ kubernetes 1.20+
     path # 检测文件服务
     mount # 文件系统挂载服务
     automount # 文件系统挂载服务
-
     ```
 
 - 存在一个默认target，在系统启动时候自动被激活，实际上是启动了与之关联的一堆捆绑服务，通过指定不同的target可以进入不同的环境
@@ -171,9 +173,9 @@ kubernetes 1.20+
     ```
 其他内容可以参考文档
 
-<<<<<<< Updated upstream
+
 ## namespaces
-- namespaces即Linux命名空间，是容器技术的基础，所谓namespace就是把操作系统上的资源抽象封装成一个个互相隔离的资源实例，使得在不同的namespace里的进程明明只是拥有资源的一个实例却仍感觉拥有系统资源的全部所有权，并对该系统资源的修改也只会对本namespace里的成员进程可见，Linux提供了如下命名空间：
+- namespaces即Linux命名空间，是容器技术的基础，所谓namespace就是把操作系统上的资源抽象封装成一个个互相隔离的资源实例，使得在不同的namespace里的进程虽只拥有资源的一个实例却仍感觉拥有系统资源的全部所有权，对该系统资源的修改也只会对本namespace里的成员进程可见，Linux提供了如下命名空间：
     ```sh
     Cgroup  # cgroup的根目录
     IPC     # 信号量，进程通信等
@@ -197,13 +199,12 @@ kubernetes 1.20+
 ## ipvs
 
 ## 依赖和配置
-- kubernetes最主要的任务就是在每个节点管理容器，所以需要在每个节点安装容器运行时，比如[docker](https://docs.docker.com/)和[containerd](https://containerd.io/)
+- kubernetes最主要的任务就是在每个节点管理容器，所以需要在每个 节点安装容器运行时，比如[docker](https://docs.docker.com/)和[containerd](https://containerd.io/)
 
 ## 容器运行时简介
-- CRI即容器运行时接口，现在一般内置于容器运行时（比如Containerd）作为CRI插件来提供RuntimeService和ImageService grpc服务（unix 套接字），kubelet则作为CRI客户端来调用容器运行时接口来完成镜像管理和容器生命周期管理等操作，容器运行时（比如runC）则需要使用cgroups来完成对容器的资源管理和追踪，使用namespaces来隔离容器间资源，使用cni插件提供容器网络，更详细内容可以参考[这里](https://kubernetes.feisky.xyz/extension/cri)
-- 现在版本的kubernetes推荐使用systemd来统一托管组件、容器运行时和容器，不直接使用cgroupfs（cgroup虚拟文件系统），原因可以参考[这里](https://kubernetes.io/zh/docs/setup/production-environment/container-runtimes/)
-- 可以修改kubelet的配置文件，添加“cgroupDriver: systemd ”来显式指定kubelet使用systemd
-- 如果是使用kubeadm搭建的集群可以修改kubeadm的配置显式给cgroupDriver（1.21版本默认这个字段为systemd）：
+- CRI即容器运行时接口，现在一般内置于容器运行时作为CRI插件来提供对外grpc服务，kubelet则作为CRI客户端通过unix套接字来调用该接口，完成镜像管理和容器生命周期管理等操作。
+- 容器运行时使用cgroups来完成对容器的资源管理和追踪，使用namespaces来隔离容器间资源，使用cni插件提供容器网络，更详细内容可以参考[这里](https://kubernetes.feisky.xyz/extension/cri)
+。现在版本的kubernetes推荐使用systemd来统一托管组件、容器运行时和容器，不同时混用systemd和cgroupfs（cgroup虚拟文件系统），避免导致相互间的资源冲突，更详细的原因可以参考[这里](https://kubernetes.io/zh/docs/setup/production-environment/container-runtimes/)。可以修改kubelet的配置文件，添加“cgroupDriver: systemd ”来显式指定kubelet使用systemd，如果是使用kubeadm搭建的集群可以修改kubeadm的配置显式给cgroupDriver（1.21版本默认这个字段为systemd）：
     ```yml
     # kubeadm-config.yaml
     
@@ -215,13 +216,14 @@ kubernetes 1.20+
     apiVersion: kubelet.config.k8s.io/v1beta1
     cgroupDriver: systemd
     ```
-- 这之后执行init命令，kubeadm就会将KubeletConfiguration结构体（实际是kube-system里的ConfigMap）的信息写入到节点文件/var/lib/kubelet/config.yaml中，继而把它传递给本地节点的kubelet，详细内容可参考[文档](https://kubernetes.io/zh/docs/tasks/administer-cluster/kubeadm/configure-cgroup-driver/)
+- 这之后执行init命令，kubeadm就会将KubeletConfiguration结构体（实际是k8s里命名空间kube-system里的ConfigMap）的信息写入到节点文件/var/lib/kubelet/config.yaml中，即kubelet的配置文件，详细内容可参考[文档](https://kubernetes.io/zh/docs/tasks/administer-cluster/kubeadm/configure-cgroup-driver/)
 
 ## runc
-- [runC](https://github.com/opencontainers/runc)项目是根据OCI（开放容器倡议）构建的命令行工具，主要依赖dokcer公司开源的[libcontainer](https://github.com/opencontainers/runc/tree/master/libcontainer)项目作为其内部库来创建和管理容器生命周期，能够透明的管理容器的命名空间（namespaces）、控制组（cgroups）、系统调用能力和文件访问，主要利用[libseccomp](https://github.com/seccomp/libseccomp)（underlying BPF based syscall filter language）来过滤容器进程发起的系统调用，利用cgroup来对容器进行资源限制，利用namespaces来隔离容器间资源
-- runC从v1.0.0-r95开始无论系统的cgroup是v1还是v2都自动忽略kmem.limit（kernel memory limiting），原因是会导致一些内核版本发生内存泄露，比如在RHEL7里这个参数会导致kernel memory无法释放，5.4以上的的内核也废弃了cgroup v1的kernel memory limiting，从v1.0.0-rc93自动开启selinux和apparmor，[具体可以参考](https://github.com/containerd/containerd/blob/master/docs/RUNC.md)
-- 编译：
+- [runC](https://github.com/opencontainers/runc)项目是根据OCI（开放容器倡议）构建的命令行工具，主要依赖dokcer公司开源的[libcontainer](https://github.com/opencontainers/runc/tree/master/libcontainer)项目作为其内部库来创建和管理容器生命周期，该项目能够透明的管理容器的命名空间（namespaces）、控制组（cgroups）、系统调用能力和文件访问，并利用[libseccomp](https://github.com/seccomp/libseccomp)（underlying BPF based syscall filter language）来过滤容器进程发起的系统调用，利用cgroup来对容器进行资源限制，利用namespaces来隔离容器间资源
+- runC从v1.0.0-r95开始无论系统的cgroup是v1还是v2都自动忽略kmem.limit（kernel memory limiting），原因是会导致一些低内核版本的发布版内存泄露，比如在RHEL7里这个参数会导致kernel memory无法释放，5.4以上的的内核也废弃了cgroup v1的kernel memory limiting
+- 从v1.0.0-rc93自动开启selinux和apparmor，低内核版本建议直接关闭kernel memory limiting，具体说明可以参考[这里](https://github.com/containerd/containerd/blob/master/docs/RUNC.md)：
     ```sh
+    make BUILDTAGS='nokmem seccomp' && make install
     ```
 
 ## runc核心代码分析
