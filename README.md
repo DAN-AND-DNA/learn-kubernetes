@@ -171,6 +171,7 @@ kubernetes 1.20+
     ```
 其他内容可以参考文档
 
+<<<<<<< Updated upstream
 ## namespaces
 - namespaces即Linux命名空间，是容器技术的基础，所谓namespace就是把操作系统上的资源抽象封装成一个个互相隔离的资源实例，使得在不同的namespace里的进程明明只是拥有资源的一个实例却仍感觉拥有系统资源的全部所有权，并对该系统资源的修改也只会对本namespace里的成员进程可见，Linux提供了如下命名空间：
     ```sh
@@ -224,6 +225,8 @@ kubernetes 1.20+
     ```
 
 ## runc核心代码分析
+## netfilter
+## iptables
 
 ## containerd
 - containerd是工业级容器运行时，强调简单、可靠和可移植性，可以作为Linux上的容器运行时守护进程，管理完整的容器的生命周期，镜像传输和存储，监控容器的底层存储和网络，官方介绍可以参考[这里](https://containerd.io)，
